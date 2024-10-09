@@ -1,5 +1,6 @@
 import Home from '@/components/portalProfessor';
-import PaginaAviso from '@/Pages/Avisos';
+import PaginaAviso from '@/Pages/Avisos/Avisos';
+import PaginaGerenciarCadastros from '@/Pages/Geren_Cadastro/gerenc_cadastros';
 import AuthComponent from 'components/AuthComponent/AuthComponent';
 
 
@@ -23,7 +24,11 @@ const App: React.FC = () => {
         <Route path='/avisos' element={
           <PrivateRoute>
             <PaginaAviso/>
-
+          </PrivateRoute>
+        }></Route>
+        <Route path='/cadastros' element={
+          <PrivateRoute>
+            <PaginaGerenciarCadastros/>
           </PrivateRoute>
         }></Route>
       </Routes>

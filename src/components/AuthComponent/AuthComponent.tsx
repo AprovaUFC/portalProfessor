@@ -204,7 +204,7 @@ const AuthComponent = () => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e: any) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="border-green-300 focus:border-green-500 focus:ring-green-500"
                 />

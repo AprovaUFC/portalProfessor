@@ -178,13 +178,12 @@ export default function PaginaAviso() {
   
 
   return (
-    <div className="flex h-screen bg-green-50 ">
-      
-        
-      
+    <div className="flex h-screen overflow-hidden bg-green-50 ">
+      <div className="w-64">
       <NavBarComponent/>
+      </div>
       <motion.div
-        className=" pt-10 pl-20 rounded-3xl "
+        className="max-w-6xl mx-auto pt-10 rounded-3xl "
         initial="initial"
         animate="animate"
         variants={fadeInUp}
