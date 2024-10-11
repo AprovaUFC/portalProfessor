@@ -150,9 +150,9 @@ const AuthComponent = () => {
           <TabsContent value="login">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Usuário</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
+                  id="email"
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
