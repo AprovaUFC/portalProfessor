@@ -168,7 +168,7 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
