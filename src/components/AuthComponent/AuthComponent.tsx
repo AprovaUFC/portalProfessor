@@ -23,7 +23,7 @@ const AuthComponent = () => {
     const [areaEscolhida, setAreaEscolhida] = useState<AreaEscolhida | "">("")
     const [loginError,setLoginError] = useState('')
     const [registerError,setRegisterError] = useState('')
-    const [showModal,setShowModal] = useState(true)
+    const [showModal,setShowModal] = useState(false)
     const navigate = useNavigate();
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
