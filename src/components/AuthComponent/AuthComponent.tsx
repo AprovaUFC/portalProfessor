@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import Loading from '../Loading/Loading'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
 
 type AreaEscolhida = "Matemática" | "Redação" | "História" | "Física"
 
@@ -22,8 +23,8 @@ const AuthComponent = () => {
     const [areaEscolhida, setAreaEscolhida] = useState<AreaEscolhida | "">("")
     const [loginError,setLoginError] = useState('')
     const [registerError,setRegisterError] = useState('')
+    const [showModal,setShowModal] = useState(true)
     const navigate = useNavigate();
-
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoginError(''); // Reseta o erro ao tentar login novamente
@@ -119,14 +120,14 @@ const AuthComponent = () => {
                     
                 },
             ]);
-    
+            
         setIsLoading(false);  // Finaliza o estado de carregamento após a inserção dos dados
-    
+         
         if (insertError) {
             console.error('Erro ao inserir dados na tabela aluno:', insertError.message);
         } else {
             console.log('Usuário registrado com sucesso e inserido na tabela Professor');
-            
+            setShowModal(true);
         }
     };
 
@@ -252,6 +253,18 @@ const AuthComponent = () => {
         </Tabs>
       </CardContent>
     </Card>
+    
+    <Dialog open={showModal} onOpenChange={setShowModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cadastro Realizado!</DialogTitle>
+            <DialogDescription>
+              Verifique a caixa de mensagens do email inserido no cadastro para confirmar o email.
+            </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>`
+    
   </div>
   )
 }
