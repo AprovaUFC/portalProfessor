@@ -42,7 +42,7 @@ const AuthComponent = () => {
     
             // Login bem-sucedido
             console.log('Login bem-sucedido', user);
-            navigate('/home'); // Redireciona para a página principal
+            navigate('/avisos-cadastrados'); // Redireciona para a página principal
         } catch (err) {
             console.error('Erro ao fazer login:', err);
             setLoginError('Erro ao fazer login. Tente novamente.'); // Em caso de erro inesperado
@@ -135,7 +135,7 @@ const AuthComponent = () => {
     }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-green-50">
+    <div className="flex items-center justify-center min-h-screen bg-green-50 max-sm:p-6">
     <Card className="w-[400px]">
       <CardHeader className="bg-green-600 text-white rounded-t-lg">
         <CardTitle>Portal do Professor</CardTitle>

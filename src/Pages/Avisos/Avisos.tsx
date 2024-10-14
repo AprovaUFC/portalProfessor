@@ -178,18 +178,19 @@ export default function PaginaAviso() {
   
 
   return (
-    <div className="flex h-screen overflow-hidden bg-green-50 ">
-      <div className="w-64">
+    <div className="flex h-screen  bg-green-50 max-sm:p-2">
+      
       <NavBarComponent/>
-      </div>
+      
+      <div className="min-h-screen mx-auto bg-green-50  p-4 overflow-auto">
       <motion.div
-        className="max-w-6xl mx-auto pt-10 rounded-3xl "
+        className=" max-w-2xl mx-auto pt-10 rounded-3xl  "
         initial="initial"
         animate="animate"
         variants={fadeInUp}
       >
         
-        <Card className=" w-screen max-w-6xl rounded-lg" >
+        <Card className=" w-full max-w-lg mx-auto rounded-lg " >
         
           <CardHeader className="bg-gradient-to-r from-green-600 to-green-500 rounded-t-lg">
             <CardTitle className="text-2xl text-white text-center">Inserir Novo Aviso</CardTitle>
@@ -288,9 +289,11 @@ export default function PaginaAviso() {
           </CardFooter>
         </Card>
         <div className="w-screen max-w-full">
-        {isLoading && (<Loading/>)}
+        
         </div>
       </motion.div>
+      {isLoading && (<Loading/>)}
+      </div>
     </div>
   )
 }

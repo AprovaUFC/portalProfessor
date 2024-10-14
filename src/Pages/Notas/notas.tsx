@@ -150,9 +150,9 @@ export default function PaginaNotas() {
   return (
     <div className="flex bg-green-50">
       <NavBarComponent />
-      <div className="min-h-screen bg-gradient-to-b mx-auto p-4">
+      <div className="min-h-screen bg-gradient-to-b mx-auto p-4 bg-green-50 max-sm:max-w-sm overflow-hidden">
         <motion.div
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto max-sm:max-w-sm"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
