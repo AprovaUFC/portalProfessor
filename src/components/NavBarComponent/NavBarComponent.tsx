@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../ui/button'
-import { Bell, BookOpen, GraduationCap,  HomeIcon, LogOut, Menu, User, UserCheck } from 'lucide-react'
+import { Bell, BookOpen, Check, GraduationCap,  LogOut, Menu, User, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -41,13 +41,13 @@ const NavBarComponent = () => {
     </div>
     <ul className="space-y-2 p-4">
       <li>
-      <Link to={'/home'}>
+      <Link to={'/avisos-cadastrados'}>
         <Button
           variant="ghost"
           className="w-full justify-start text-green-700 hover:bg-green-100 hover:text-green-800"
         >
-          <HomeIcon className="mr-2 h-4 w-4" />
-          Inicio
+          <Check className="mr-2 h-4 w-4" />
+          Avisos Inseridos
           
         </Button>
         </Link>
@@ -101,7 +101,7 @@ const NavBarComponent = () => {
       </li>
 
       <li>
-        <Link to={'/home'}>
+        <Link to={'/perfil'}>
         <Button
           variant="ghost"
           className="w-full justify-start text-green-700 hover:bg-green-100 hover:text-green-800"

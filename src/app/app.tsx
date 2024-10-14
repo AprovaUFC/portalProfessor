@@ -1,8 +1,9 @@
-import Home from '@/components/portalProfessor';
 import PaginaGerenciarAtividades from '@/Pages/Atividades/geren_atividades';
 import PaginaAviso from '@/Pages/Avisos/Avisos';
+import AvisosCadastrados from '@/Pages/AvisosCadastrados/avisosCadastrados';
 import PaginaGerenciarCadastros from '@/Pages/Geren_Cadastro/gerenc_cadastros';
 import PaginaNotas from '@/Pages/Notas/notas';
+import PerfilProfessor from '@/Pages/Perfil/perfil';
 import AuthComponent from 'components/AuthComponent/AuthComponent';
 
 
@@ -18,9 +19,9 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<AuthComponent />} />
-        <Route path='/home' element={
+        <Route path='/avisos-cadastrados' element={
           <PrivateRoute>
-            <Home/>
+            <AvisosCadastrados/>
           </PrivateRoute>
         }></Route>
         <Route path='/avisos' element={
@@ -41,6 +42,11 @@ const App: React.FC = () => {
         <Route path='/notas' element={
           <PrivateRoute>
             <PaginaNotas/>
+          </PrivateRoute>
+        }></Route>
+        <Route path='/perfil' element={
+          <PrivateRoute>
+            <PerfilProfessor/>
           </PrivateRoute>
         }></Route>
       </Routes>
