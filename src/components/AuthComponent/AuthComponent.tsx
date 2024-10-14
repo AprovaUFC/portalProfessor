@@ -25,30 +25,44 @@ const AuthComponent = () => {
     const [registerError,setRegisterError] = useState('')
     const [showModal,setShowModal] = useState(false)
     const navigate = useNavigate();
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setLoginError(''); // Reseta o erro ao tentar login novamente
-    
-        try {
-            const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-    
-            // Verifica se ocorreu um erro de autenticação
-            if (authError || !user) {
-                setLoginError('Email ou senha inválido.'); // Mensagem de erro mais clara para o usuário
-                return;
-            }
-    
-            // Login bem-sucedido
-            console.log('Login bem-sucedido', user);
-            navigate('/avisos-cadastrados'); // Redireciona para a página principal
-        } catch (err) {
-            console.error('Erro ao fazer login:', err);
-            setLoginError('Erro ao fazer login. Tente novamente.'); // Em caso de erro inesperado
+
+const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoginError(''); // Reseta o erro ao tentar login novamente
+
+    try {
+        // Autenticação do usuário
+        const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        // Verifica se ocorreu um erro de autenticação
+        if (authError || !user) {
+            setLoginError('Email ou senha inválido.'); // Mensagem de erro clara para o usuário
+            return;
         }
-    };
+
+        // Busca o perfil do usuário após login
+        const { data: userProfile, error: profileError }:any = await supabase
+            .from('Professor') // Substitua pelo nome correto da tabela de perfis
+            .select('is_Professor')
+            .eq('email', user.email)
+            .single();
+        // Verifica se houve erro ao buscar o perfil ou se o usuário não é um professor
+        if (profileError || userProfile?.is_Professor === false) {
+            await supabase.auth.signOut();
+            setLoginError('Acesso negado. Somente professores podem fazer login.');
+            return;
+        }
+        
+        // Login bem-sucedido e é professor
+        navigate('/avisos-cadastrados'); // Redireciona para a página principal
+    } catch (err) {
+        console.error('Erro ao fazer login:', err);
+        setLoginError('Erro ao fazer login. Tente novamente.'); // Em caso de erro inesperado
+    }
+};
 
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {

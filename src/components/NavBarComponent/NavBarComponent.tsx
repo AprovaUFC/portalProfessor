@@ -19,7 +19,7 @@ const NavBarComponent = () => {
         if (error) {
           console.error('Erro ao realizar logout:', error);
         } else {
-          console.log('Logout realizado com sucesso');
+          
           // Redirecionar ou atualizar o estado da aplicação conforme necessário
           navigate('/')
         }
