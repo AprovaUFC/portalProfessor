@@ -4,6 +4,7 @@ import AvisosCadastrados from '@/Pages/AvisosCadastrados/avisosCadastrados';
 import PaginaGerenciarCadastros from '@/Pages/Geren_Cadastro/gerenc_cadastros';
 import PaginaNotas from '@/Pages/Notas/notas';
 import PerfilProfessor from '@/Pages/Perfil/perfil';
+import ResetSenha from '@/Pages/ResetSenha/ResetSenha';
 import AuthComponent from 'components/AuthComponent/AuthComponent';
 
 
@@ -49,6 +50,7 @@ const App: React.FC = () => {
             <PerfilProfessor/>
           </PrivateRoute>
         }></Route>
+        <Route path='/reset-password' element={<ResetSenha/>}></Route>
       </Routes>
     </Router>
   );

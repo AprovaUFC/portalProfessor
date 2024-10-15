@@ -24,13 +24,29 @@ const AuthComponent = () => {
     const [loginError,setLoginError] = useState('')
     const [registerError,setRegisterError] = useState('')
     const [showModal,setShowModal] = useState(false)
+    const [forgotPasswordModal, setForgotPasswordModal] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
     const navigate = useNavigate();
 
-const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoginError(''); // Reseta o erro ao tentar login novamente
 
-    try {
+    const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setResetMessage('');
+    
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        setResetMessage('Erro ao tentar recuperar senha. Verifique o email inserido.');
+      } else {
+        setResetMessage('Um email de recuperação foi enviado. Por favor, verifique sua caixa de entrada.');
+      }
+    };
+    
+    
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setLoginError(''); // Reseta o erro ao tentar login novamente
+
+      try {
         // Autenticação do usuário
         const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
             email,
@@ -44,25 +60,25 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         }
 
         // Busca o perfil do usuário após login
-        const { data: userProfile, error: profileError }:any = await supabase
-            .from('Professor') // Substitua pelo nome correto da tabela de perfis
-            .select('is_Professor')
-            .eq('email', user.email)
-            .single();
-        // Verifica se houve erro ao buscar o perfil ou se o usuário não é um professor
-        if (profileError || userProfile?.is_Professor === false) {
-            await supabase.auth.signOut();
-            setLoginError('Acesso negado. Somente professores podem fazer login.');
-            return;
-        }
-        
-        // Login bem-sucedido e é professor
-        navigate('/avisos-cadastrados'); // Redireciona para a página principal
-    } catch (err) {
-        console.error('Erro ao fazer login:', err);
-        setLoginError('Erro ao fazer login. Tente novamente.'); // Em caso de erro inesperado
-    }
-};
+          const { data: userProfile, error: profileError }:any = await supabase
+              .from('Professor') // Substitua pelo nome correto da tabela de perfis
+              .select('is_Professor')
+              .eq('email', user.email)
+              .single();
+          // Verifica se houve erro ao buscar o perfil ou se o usuário não é um professor
+          if (profileError || userProfile?.is_Professor === false) {
+              await supabase.auth.signOut();
+              setLoginError('Acesso negado. Somente professores podem fazer login.');
+              return;
+          }
+          
+          // Login bem-sucedido e é professor
+          navigate('/avisos-cadastrados'); // Redireciona para a página principal
+      } catch (err) {
+          console.error('Erro ao fazer login:', err);
+          setLoginError('Erro ao fazer login. Tente novamente.'); // Em caso de erro inesperado
+      }
+     };
 
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -187,6 +203,10 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
                 />
               </div>
               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Entrar</Button>
+              <Button type="button" variant="link" onClick={() => setForgotPasswordModal(true)} className="mt-2 w-full self-center">
+                Esqueceu sua senha?
+              </Button>
+
                 {/* Exibe a mensagem de erro se houver */}
                 {loginError && (
                     <p className="text-red-500 text-sm">
@@ -277,7 +297,36 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
             </DialogDescription>
         </DialogHeader>
       </DialogContent>
-    </Dialog>`
+    </Dialog>
+
+    <Dialog open={forgotPasswordModal} onOpenChange={setForgotPasswordModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Recuperar Senha</DialogTitle>
+          <DialogDescription>
+            Insira seu email para receber instruções de redefinição de senha.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleForgotPassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="reset-email">Email</Label>
+            <Input
+              id="reset-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="border-green-300 focus:border-green-500 focus:ring-green-500"
+            />
+          </div>
+          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Enviar Email de Recuperação</Button>
+        </form>
+        {resetMessage && (
+          <p className="mt-4 text-green-500 text-sm">{resetMessage}</p>
+        )}
+      </DialogContent>
+    </Dialog>
+
     
   </div>
   )
