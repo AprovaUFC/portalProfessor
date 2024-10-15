@@ -55,29 +55,38 @@ export default function PaginaGerenciarCadastros() {
   const cadastrosPaginados = cadastrosFiltrados.slice(indiceInicial, indiceInicial + itensPorPagina)
 
   const atualizarStatus = async(id: number, novoStatus: StatusCadastro) => {
+    // Atualiza o estado local imediatamente para feedback rápido
     setCadastros(cadastros.map(cadastro =>
-      cadastro.id === id ? { ...cadastro, status: novoStatus } : cadastro
+      cadastro.id === id ? { ...cadastro, Status: novoStatus } : cadastro
     ))
-    toast.success(`Status do cadastro atualizado para ${novoStatus}`)
-    console.log(novoStatus)
+  
+    // Exibe notificação de status alterado enquanto espera a resposta
+    toast.info(`Atualizando o status para ${novoStatus}...`)
+  
     try {
-        const { error } = await supabase
-          .from('Aluno') // Nome da tabela no Supabase
-          .update({ Status: novoStatus }) // Define o novo status
-          .eq('id', id); // Condição para garantir que só o registro com o ID correto será atualizado
-    
-        if (error) {
-          throw error;
-        }
-    
-        // Notifica o usuário que a atualização foi bem-sucedida
-        toast.success(`Status do cadastro atualizado para ${novoStatus}`);
-        console.log(`Status atualizado para: ${novoStatus}`);
-      } catch (error) {
-        console.error('Erro ao atualizar o status:', error);
-        toast.error('Erro ao atualizar o status. Tente novamente.');
+      // Envia a atualização para o Supabase
+      const { error } = await supabase
+        .from('Aluno') // Nome da tabela no Supabase
+        .update({ Status: novoStatus }) // Define o novo status
+        .eq('id', id); // Condição para garantir que só o registro com o ID correto será atualizado
+  
+      if (error) {
+        throw error;
       }
+  
+      // Notifica o usuário que a atualização foi bem-sucedida
+      toast.success(`Status do cadastro atualizado para ${novoStatus}`);
+      console.log(`Status atualizado para: ${novoStatus}`);
+    } catch (error) {
+      console.error('Erro ao atualizar o status:', error);
+      toast.error('Erro ao atualizar o status. Tente novamente.');
+      // Reverte a alteração local caso haja erro
+      setCadastros(cadastros.map(cadastro =>
+        cadastro.id === id ? { ...cadastro, Status: "PENDENTE" } : cadastro
+      ))
+    }
   }
+  
 
   const visualizarPDF = (url: string) => {
     setPdfSelecionado(url)
