@@ -21,6 +21,8 @@ type ProfessorInfo = {
   fotoPerfil: string
 }
 
+
+
 const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -50,6 +52,8 @@ export default function PerfilProfessor() {
     fotoPerfil: "/logo.png"
   })
   const [novaInfo, setNovaInfo] = useState<ProfessorInfo>(ProfessorInfo)
+  const [showConfirmEmailModal, setShowConfirmEmailModal] = useState(true);
+
 
   useEffect(() => {
     setIsLoading(true)
@@ -63,19 +67,19 @@ export default function PerfilProfessor() {
 
   
         if (user) {
-          const userEmail = user.email;
+          const userEmail = user?.email ?? "";
           const { data, error } = await supabase
             .from("Professor")
             .select("nome, email, perfil")
             .eq("email", userEmail);
-  
+          console.log( user.email)
           if (error) {
             console.error("Erro ao buscar as informações do usuário:", error);
           } else if (data && data.length > 0) {
             const fetchedProfessorInfo = data[0];
             setProfessorInfo({
               nome: fetchedProfessorInfo.nome,
-              email: fetchedProfessorInfo.email,
+              email: userEmail,
               fotoPerfil: fetchedProfessorInfo.perfil && fetchedProfessorInfo.perfil !== '' 
                 ? fetchedProfessorInfo.perfil 
                 : "/placeholder.svg?height=128&width=128",
@@ -83,7 +87,7 @@ export default function PerfilProfessor() {
             });
             setNovaInfo({
               nome: fetchedProfessorInfo.nome,
-              email: fetchedProfessorInfo.email,
+              email: userEmail,
               fotoPerfil: fetchedProfessorInfo.perfil && fetchedProfessorInfo.perfil !== '' 
                 ? fetchedProfessorInfo.perfil 
                 : "/placeholder.svg?height=128&width=128",
@@ -98,9 +102,32 @@ export default function PerfilProfessor() {
         setIsImageLoading(false)
       }
     };
+
+    const checkEmailConfirmation = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Erro ao verificar confirmação do email:', error);
+          return;
+        }
+        
+        // Verifica se o email do usuário foi confirmado
+        if (user && user.email_confirmed_at) {
+          setShowConfirmEmailModal(false); // Fecha o modal automaticamente
+        }
+      } catch (error) {
+        console.error('Erro ao checar confirmação de email:', error);
+      }
+    };
+  
+    // Executa a verificação de e-mail a cada 5 segundos até que o modal seja fechado
+    if (showConfirmEmailModal) {
+      const intervalId = setInterval(checkEmailConfirmation, 5000);
+      return () => clearInterval(intervalId);
+    }
     
     fetchData();
-  }, []);
+  }, [showConfirmEmailModal]);
   
 
   const handleEdit = () => {
@@ -157,12 +184,25 @@ export default function PerfilProfessor() {
         setNovaInfo({ ...novaInfo, fotoPerfil: fotoPerfilUrl });
       }
 
+      if(ProfessorInfo.email !== novaInfo.email){
+        // Atualiza o email na autenticação do Supabase
+        const { error: authError } = await supabase.auth.updateUser({
+          email: novaInfo.email,
+        });
+        
+        setShowConfirmEmailModal(true)
+        if (authError) {
+          console.error('Erro ao atualizar o email na autenticação:', authError);
+          return;
+        }
+      }
+
       // Atualiza os dados do Professor no banco de dados
       const { error } = await supabase
         .from('Professor')
         .update({
           nome: novaInfo.nome,
-          email: novaInfo.email,
+          email: user.email,
           perfil: fotoPerfilUrl,
         })
         .eq('email', ProfessorInfo.email);
@@ -304,9 +344,7 @@ export default function PerfilProfessor() {
           >
             Perfil do Professor
           </motion.h1>
-          {isLoading && (
-            <Loading/>
-        )}
+
           <motion.div variants={fadeInUp}>
             
             <Card className="w-full shadow-lg overflow-hidden">
@@ -480,6 +518,22 @@ export default function PerfilProfessor() {
         </DialogContent>
       </Dialog>
     </AnimatePresence>
+
+    <Dialog open={showConfirmEmailModal} onOpenChange={setShowConfirmEmailModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirmação de Mudança de Email</DialogTitle>
+            <DialogDescription>
+              Verifique sua caixa de email para confirmar a mudança de email. A alteração será realizada apenas após a confirmação.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {isLoading && (
+            <Loading/>
+        )}
     </div>
   )
 }
