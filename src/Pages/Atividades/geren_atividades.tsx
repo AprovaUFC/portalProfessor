@@ -58,7 +58,10 @@ export default function PaginaGerenciarAtividades() {
       draggable: true,
       progress: undefined,
     })
+
+
   }, [])
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -73,8 +76,18 @@ export default function PaginaGerenciarAtividades() {
   const handleSubmit = async (e: any) => {
     setIsLoading(true)
     e.preventDefault();
+    const [diaDisponivel, mesDisponivel, anoDisponivel] = atividade.dataDisponivel.split('/')
+    const [dia, mes, ano] = atividade.dataLimite.split('/')
+    const dataDisponivel = new Date(`${anoDisponivel}-${mesDisponivel}-${diaDisponivel}`)
+    const dataLimite = new Date(`${ano}-${mes}-${dia}`) 
+    const dataAtual = new Date()
     if (!validateDate(atividade.dataLimite) || !validateDate(atividade.dataDisponivel)) {
       toast.error("Por favor, insira as datas no formato dd/mm/aaaa");
+      setIsLoading(false)
+      return;
+    }else if(dataLimite < dataDisponivel && dataDisponivel < dataAtual){
+      toast.error('Por favor, insira datas compativeis ')
+      setIsLoading(false)
       return;
     }
     // console.log("Atividade criada:", atividade);
