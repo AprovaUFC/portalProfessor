@@ -14,6 +14,7 @@ import { User, Mail, Camera, Pencil, ZoomIn } from "lucide-react"
 import NavBarComponent from "@/components/NavBarComponent/NavBarComponent"
 import { supabase } from "@/lib/supabase"
 import Loading from "components/Loading/Loading"
+import { toast } from "react-toastify"
 
 type ProfessorInfo = {
   nome: string
@@ -52,7 +53,7 @@ export default function PerfilProfessor() {
     fotoPerfil: "/logo.png"
   })
   const [novaInfo, setNovaInfo] = useState<ProfessorInfo>(ProfessorInfo)
-  const [showConfirmEmailModal, setShowConfirmEmailModal] = useState(true);
+  const [showConfirmEmailModal, setShowConfirmEmailModal] = useState(false);
 
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function PerfilProfessor() {
   
         if (user) {
           const userEmail = user?.email ?? "";
+
           const { data, error } = await supabase
             .from("Professor")
             .select("nome, email, perfil")
@@ -104,15 +106,27 @@ export default function PerfilProfessor() {
     };
 
     const checkEmailConfirmation = async () => {
+
       try {
+        setShowConfirmEmailModal(true)
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) {
           console.error('Erro ao verificar confirmação do email:', error);
           return;
         }
-        
+        console.log(user)
         // Verifica se o email do usuário foi confirmado
         if (user && user.email_confirmed_at) {
+          const { error } = await supabase
+          .from('Professor')
+          .update({
+            email: novaInfo.email,
+          })
+          .eq('email', user.email);
+          if(error){
+            toast.error(`Erro ao atualizar email: ${error}`)
+          }
+          
           setShowConfirmEmailModal(false); // Fecha o modal automaticamente
         }
       } catch (error) {
@@ -164,16 +178,13 @@ export default function PerfilProfessor() {
         const fileName = `${user.id}/profile_${new Date().getTime()}.${fileExt}`;
   
         // Faz o upload da imagem para o Supabase Storage no bucket "avatars"
-        const { data, error } = await supabase.storage
+        const {  error } = await supabase.storage
           .from('avatars')
           .upload(fileName, blob, {
             upsert: true,
             contentType: blob.type,
           });
-          if(data){
-            console.log(`Data${data}`)
-          }
-        else if (error) {
+          if (error) {
           console.error("Erro ao fazer upload da imagem:", error);
           return;
         }
@@ -202,11 +213,9 @@ export default function PerfilProfessor() {
         .from('Professor')
         .update({
           nome: novaInfo.nome,
-          email: user.email,
           perfil: fotoPerfilUrl,
         })
         .eq('email', ProfessorInfo.email);
-  
       if (error) {
         console.error('Erro ao atualizar as informações do Professor:', error);
       } else {
