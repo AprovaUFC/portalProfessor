@@ -81,85 +81,69 @@ const AuthComponent = () => {
      };
 
 
-    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsLoading(true);  // Inicia o estado de carregamento
-        
-        // Verifica se o email já existe na tabela 'Aluno' antes de tentar cadastrar o usuário
-        const { data: existingUserData, error: existingUserError } = await supabase
-            .from('Aluno')
-            .select('email')
-            .eq('email', email);
-    
-        if (existingUserError) {
-            setIsLoading(false);
-            console.error('Erro ao verificar se o email já existe:', existingUserError.message);
-            return;
-        }
-    
-        if (existingUserData && existingUserData.length > 0) {
-            setIsLoading(false);
-            setRegisterError('Email ja cadastrado, tente efetuar ou login');
-            console.error('Erro: Email já está cadastrado na tabela de alunos.');
-            // alert('O email fornecido já está cadastrado. Tente fazer login ou usar outro email.');
-            return; // Interrompe a execução se o email já estiver na tabela
-        }
-    
-        // Se o email não estiver registrado, tenta registrar o usuário no Supabase
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    nome: name,  // Adiciona o nome completo ao perfil do usuário
-                },
-            },
-        });
-    
-        if (error) {
-            setIsLoading(false);  // Finaliza o estado de carregamento em caso de erro
-    
-            // Verifica se o erro é devido ao email já estar registrado no auth
-            if (error.message.includes('already registered')) {
-                console.error('Erro: Email já está registrado no Supabase Auth.');
-                // alert('O email fornecido já está cadastrado no sistema. Tente fazer login ou usar outro email.');
-            } else {
-                console.error('Erro ao cadastrar:', error.message);
-            }
-            return; // Interrompe a execução da função se houver erro
-        }
-    
-        // Se o cadastro for bem-sucedido, insira o usuário na tabela 'aluno'
-        const user = data?.user;
-        if (!user) {
-            setIsLoading(false);  // Finaliza o estado de carregamento em caso de erro
-            console.error('Erro: Usuário não foi criado corretamente.');
-            return;
-        }
-        
-        console.log(user);
-    
-        // Aqui vamos adicionar os dados do usuário na tabela 'aluno'
-        const { error: insertError } = await supabase
-            .from('Professor')
-            .insert([
-                {
-                    nome: name,
-                    email: user.email,
-                    matricula: matricula
-                    
-                },
-            ]);
-            
-        setIsLoading(false);  // Finaliza o estado de carregamento após a inserção dos dados
-         
-        if (insertError) {
-            console.error('Erro ao inserir dados na tabela aluno:', insertError.message);
-        } else {
-            console.log('Usuário registrado com sucesso e inserido na tabela Professor');
-            setShowModal(true);
-        }
-    };
+     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsLoading(true);
+  
+      const { data: existingUserData, error: existingUserError } = await supabase
+          .from('Professor')
+          .select('email')
+          .eq('email', email);
+  
+      if (existingUserError) {
+          setIsLoading(false);
+          console.error('Erro ao verificar se o email já existe:', existingUserError.message);
+          return;
+      }
+  
+      if (existingUserData && existingUserData.length > 0) {
+          setIsLoading(false);
+          setRegisterError('Email já cadastrado. Tente efetuar login.');
+          return;
+      }
+  
+      // Insere primeiro na tabela 'Professor' para obter o ID gerado
+      const { data: professorData, error: insertError } = await supabase
+          .from('Professor')
+          .insert([{
+              nome: name,
+              email: email,
+              matricula: matricula,
+              
+          }])
+          .select('id')
+          .single(); // Retorna o ID do novo registro
+  
+      if (insertError || !professorData) {
+          setIsLoading(false);
+          console.error('Erro ao inserir dados na tabela Professor:', insertError?.message);
+          return;
+      }
+  
+      const professorId = professorData.id;
+  
+      // Registra o usuário no Supabase Auth usando o ID gerado
+      const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+              data: {
+                  nome: name,
+                  professor_id: professorId,  // Adiciona o ID da tabela Professor ao perfil do usuário no Auth
+              },
+          },
+      });
+  
+      setIsLoading(false);
+  
+      if (error) {
+          console.error('Erro ao cadastrar no Supabase Auth:', error.message);
+      } else {
+          console.log('Usuário registrado com sucesso e ID da tabela Professor incluído no Auth');
+          setShowModal(true);
+      }
+  };
+  
 
     if(isLoading){
         return <Loading/>

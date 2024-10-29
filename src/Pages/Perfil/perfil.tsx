@@ -20,6 +20,7 @@ type ProfessorInfo = {
   nome: string
   email: string
   fotoPerfil: string
+  id: number
 }
 
 
@@ -50,7 +51,8 @@ export default function PerfilProfessor() {
   const [ProfessorInfo, setProfessorInfo] = useState<ProfessorInfo>({
     nome: '',
     email: '',
-    fotoPerfil: "/logo.png"
+    fotoPerfil: "/logo.png",
+    id: 0
   })
   const [novaInfo, setNovaInfo] = useState<ProfessorInfo>(ProfessorInfo)
   const [showConfirmEmailModal, setShowConfirmEmailModal] = useState(false);
@@ -66,37 +68,38 @@ export default function PerfilProfessor() {
           return;
         }
 
-  
-        if (user) {
-          const userEmail = user?.email ?? "";
-
+        if (user && user.identities && user.identities.length > 0) {
+          const userId = user.identities[0].identity_data?.professor_id ?? "";
+          console.log(userId);
+          
           const { data, error } = await supabase
             .from("Professor")
             .select("nome, email, perfil")
-            .eq("email", userEmail);
-          console.log( user.email)
+            .eq("id", userId);
+        
           if (error) {
             console.error("Erro ao buscar as informações do usuário:", error);
           } else if (data && data.length > 0) {
             const fetchedProfessorInfo = data[0];
             setProfessorInfo({
               nome: fetchedProfessorInfo.nome,
-              email: userEmail,
+              email: fetchedProfessorInfo.email,
               fotoPerfil: fetchedProfessorInfo.perfil && fetchedProfessorInfo.perfil !== '' 
                 ? fetchedProfessorInfo.perfil 
                 : "/placeholder.svg?height=128&width=128",
-              
+              id: userId
             });
             setNovaInfo({
               nome: fetchedProfessorInfo.nome,
-              email: userEmail,
+              email: fetchedProfessorInfo.email,
               fotoPerfil: fetchedProfessorInfo.perfil && fetchedProfessorInfo.perfil !== '' 
                 ? fetchedProfessorInfo.perfil 
                 : "/placeholder.svg?height=128&width=128",
+              id: userId,
             });
-
           }
         }
+        
       } catch (error) {
         console.error("Erro durante o fetch:", error);
       } finally {
@@ -116,18 +119,23 @@ export default function PerfilProfessor() {
         }
         console.log(user)
         // Verifica se o email do usuário foi confirmado
-        if (user && user.email_confirmed_at) {
-          const { error } = await supabase
-          .from('Professor')
-          .update({
-            email: novaInfo.email,
-          })
-          .eq('email', user.email);
-          if(error){
-            toast.error(`Erro ao atualizar email: ${error}`)
-          }
-          
-          setShowConfirmEmailModal(false); // Fecha o modal automaticamente
+        if (user && user.email_confirmed_at && user.identities && user.identities.length > 0) {
+          const userId = user.identities[0].identity_data?.professor_id ?? "";
+
+          if(user.email === novaInfo.email){
+            setIsLoading(true)
+            const { error } = await supabase
+            .from('Professor')
+            .update({
+              email: novaInfo.email,
+            })
+            .eq('id', userId);
+            if(error){
+              toast.error(`Erro ao atualizar email: ${error}`)
+            }
+            setShowConfirmEmailModal(false);
+            setIsLoading(false)
+          } // Fecha o modal automaticamente
         }
       } catch (error) {
         console.error('Erro ao checar confirmação de email:', error);
@@ -136,7 +144,7 @@ export default function PerfilProfessor() {
   
     // Executa a verificação de e-mail a cada 5 segundos até que o modal seja fechado
     if (showConfirmEmailModal) {
-      const intervalId = setInterval(checkEmailConfirmation, 5000);
+      const intervalId = setInterval(checkEmailConfirmation, 2000);
       return () => clearInterval(intervalId);
     }
     
@@ -199,6 +207,7 @@ export default function PerfilProfessor() {
         // Atualiza o email na autenticação do Supabase
         const { error: authError } = await supabase.auth.updateUser({
           email: novaInfo.email,
+          
         });
         
         setShowConfirmEmailModal(true)

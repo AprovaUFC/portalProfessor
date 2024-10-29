@@ -43,6 +43,7 @@
     "postinstall": "husky install"
   },
   "dependencies": {
+    "@babel/core": "^7.25.8",
     "@heroicons/react": "2.0.18",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -79,7 +80,7 @@
     "@types/react-input-mask": "^3.0.5",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
-    "@vitejs/plugin-react": "^4.0.4",
+    "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "10.4.13",
     "eslint": "^8.46.0",
     "eslint-plugin-import": "2.27.4",
@@ -94,7 +95,7 @@
     "tailwindcss": "3.2.4",
     "typescript": "^5.0.2",
     "vite": "^4.4.8",
-    "vite-preset-react": "2.3.0",
+    "vite-preset-react": "^2.3.0",
     "vitest": "^0.34.5"
   }
 }
