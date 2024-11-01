@@ -35,25 +35,23 @@ export default function PaginaAviso() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const novosArquivos = Array.from(files).map((file) => {
-        const tipo: "imagem" | "documento" = file.type.startsWith("image/") ? "imagem" : "documento"; // Especifica o tipo corretamente
+    if (files && files.length > 0) {
+      // Substitui o arquivo existente com o novo
+      const file = files[0];
+      const tipo: "imagem" | "documento" = file.type.startsWith("image/") ? "imagem" : "documento";
   
-        return {
-          name: file.name,
-          nome: file.name,
-          tipo: tipo, // O tipo é agora reconhecido como uma string literal correta
-          url: URL.createObjectURL(file),
-          arquivo: file
-        };
-      });
-
-      // Verifica se o arquivo é uma imagem para definir no estado 'imagem'
-
-
-      setArquivos((prevArquivos) => [...prevArquivos, ...novosArquivos]);
+      const novoArquivo: Arquivo = {
+        
+        nome: file.name,
+        tipo: tipo,
+        url: URL.createObjectURL(file),
+        arquivo: file,
+      };
+  
+      setArquivos([novoArquivo]); // Substitui o array de arquivos com o novo arquivo
     }
   };
+  
 
   const removerArquivo = (index: number) => {
     const novosArquivos = [...arquivos];
@@ -229,9 +227,9 @@ export default function PaginaAviso() {
                       ref={fileInputRef}
                       className="hidden"
                       onChange={handleFileChange}
-                      multiple
                       accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                     />
+
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                     {arquivos.map((arquivo, index) => (

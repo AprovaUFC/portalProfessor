@@ -25,7 +25,7 @@ type Cadastro = {
   email: string
   created_at: string
   Status: StatusCadastro
-  perfil: string
+  documentos: string
 }
 
 const fadeInUp = {
@@ -100,7 +100,7 @@ export default function PaginaGerenciarCadastros() {
   useEffect(()=>{
     const fecthAluno = async () =>{
         try{
-            const {data,error} = await supabase.from('Aluno').select('id,name,created_at,email,perfil,Status')
+            const {data,error} = await supabase.from('Aluno').select('id,name,created_at,email,documentos,Status')
             if (error){
                 console.log(error)
             }else{
@@ -185,7 +185,7 @@ export default function PaginaGerenciarCadastros() {
                                   variant="outline"
                                   size="sm"
                                   className="bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                  onClick={() => visualizarPDF(cadastro.perfil)}
+                                  onClick={() => visualizarPDF(cadastro.documentos)}
                                 >
                                   <Eye size={16} className="mr-1" /> Visualizar PDF
                                 </Button>
@@ -274,7 +274,7 @@ export default function PaginaGerenciarCadastros() {
                                         variant="outline"
                                         size="sm"
                                         className="bg-blue-100 text-blue-700 hover:bg-blue-200 ml-2"
-                                        onClick={() => visualizarPDF(cadastro.perfil)}
+                                        onClick={() => visualizarPDF(cadastro.documentos)}
                                       >
                                         <Eye size={16} className="mr-1" /> Visualizar PDF
                                       </Button>
