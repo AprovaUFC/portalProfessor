@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Button } from '../ui/button'
-import { Bell, BookOpen, Check, GraduationCap,  LogOut, Menu, User, UserCheck } from 'lucide-react'
+import { Bell, BookOpen, ChartNoAxesCombined, Check, GraduationCap,  LogOut, Menu, User, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Link, useNavigate } from 'react-router-dom'
 
 const NavBarComponent = () => {
-
+  
 
     const [isNavOpen, setIsNavOpen] = useState(false)
     const navigate = useNavigate()
@@ -95,6 +95,17 @@ const NavBarComponent = () => {
               className="w-full justify-start text-green-700 hover:bg-green-100 hover:text-green-800"
             >
               <GraduationCap className="mr-2 h-4 w-4" />
+              Gerenciar Notas
+            </Button>
+        </Link>
+      </li>
+      <li>
+        <Link to={'/notasAlunos'}>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-green-700 hover:bg-green-100 hover:text-green-800"
+            >
+              <ChartNoAxesCombined className="mr-2 h-4 w-4" />
               Notas
             </Button>
         </Link>

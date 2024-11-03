@@ -5,6 +5,7 @@ import PaginaGerenciarCadastros from '@/Pages/Geren_Cadastro/gerenc_cadastros';
 import PaginaNotas from '@/Pages/Notas/notas';
 import PerfilProfessor from '@/Pages/Perfil/perfil';
 import ResetSenha from '@/Pages/ResetSenha/ResetSenha';
+import NotasAlunos from '@/Pages/TodasNotas/notasAlunos';
 import AuthComponent from 'components/AuthComponent/AuthComponent';
 
 
@@ -48,6 +49,11 @@ const App: React.FC = () => {
         <Route path='/perfil' element={
           <PrivateRoute>
             <PerfilProfessor/>
+          </PrivateRoute>
+        }></Route>
+        <Route path='/notasAlunos' element={
+          <PrivateRoute>
+              <NotasAlunos/>
           </PrivateRoute>
         }></Route>
         <Route path='/reset-password' element={<ResetSenha/>}></Route>
