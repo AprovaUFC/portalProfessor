@@ -123,27 +123,27 @@ export default function AvisosCadastrados() {
                       </div>
                     )}
 
-
-                      {aviso.arquivos && (
-                        <div>
-                          <h3 className="font-semibold text-green-700 mb-2">Arquivo disponível:</h3>
-                          <div className="flex items-center justify-between bg-green-50 p-2 rounded-md">
-                            <div className="flex items-center space-x-2">
-                              <FileText className="text-green-600" size={20} />
-                              <span className="text-sm text-gray-700">Arquivo</span>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-green-600 hover:text-green-700 hover:bg-green-100"
-                              onClick={() => window.open(aviso.arquivos, '_blank')}
-                            >
-                              <Download size={16} className="mr-1" />
-                              Baixar
-                            </Button>
+                    {aviso.arquivos && (
+                      <div>
+                        <h3 className="font-semibold text-green-700 mb-2">Arquivo disponível:</h3>
+                        <div className="flex items-center justify-between bg-green-50 p-2 rounded-md">
+                          <div className="flex items-center space-x-2">
+                            <FileText className="text-green-600" size={20} />
+                            <span className="text-sm text-gray-700">Arquivo</span>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-100"
+                            onClick={() => window.open(aviso.arquivos, '_blank')}
+                          >
+                            <Download size={16} className="mr-1" />
+                            Baixar
+                          </Button>
                         </div>
-                      )}
+                      </div>
+                    )}
+
                     </CardContent>
                     <CardFooter className="bg-green-50 flex justify-between">
                       <Badge variant="outline" className="text-green-600 border-green-600">

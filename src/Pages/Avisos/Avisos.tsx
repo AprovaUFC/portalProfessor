@@ -61,7 +61,6 @@ export default function PaginaAviso() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
   
     if (!conteudo.trim()) {
@@ -70,51 +69,43 @@ export default function PaginaAviso() {
     }
   
     try {
-      // Variáveis para armazenar URLs de imagens e arquivos
-      let imagemUrls: string[] = [];
-      let arquivosUrls: string[] = [];
-      setIsLoading(true)
-      // Upload das imagens e dos arquivos
+      let imagemUrl = "";
+      let arquivoUrl = "";
+      setIsLoading(true);
+  
+      // Upload dos arquivos
       if (arquivos && arquivos.length > 0) {
-        for (const arquivo of arquivos) {
-          const uniqueFileName = `${Date.now()}-${arquivo.nome}`; // Gera um nome único para cada arquivo
-          const { data, error } = await supabase.storage
-            .from("arq_avisos") // Nome do bucket do Supabase
-            .upload(uniqueFileName, arquivo.arquivo); // Faz upload do arquivo ou imagem
+        const arquivo = arquivos[0];
+        const uniqueFileName = `${arquivo.nome}`;
+        const { data, error } = await supabase.storage
+          .from("arq_avisos")
+          .upload(uniqueFileName, arquivo.arquivo);
   
-          if (error) throw error;
+        if (error) throw error;
   
-          if (data) {
-            // Gera a URL completa do arquivo no Supabase após o upload
-            const { data:publicURL } = supabase.storage
-              .from("arq_avisos")
-              .getPublicUrl(uniqueFileName);
-            console.log(publicURL.publicUrl)
-            // Verifica se o arquivo é uma imagem ou documento e armazena na lista correta
+        if (data) {
+          const { data: publicURL } = supabase.storage
+            .from("arq_avisos")
+            .getPublicUrl(uniqueFileName);
+  
+          if (publicURL?.publicUrl) {
             if (arquivo.tipo === "imagem") {
-              imagemUrls.push(publicURL.publicUrl || ""); // Armazena a URL da imagem
+              imagemUrl = publicURL.publicUrl;
             } else {
-              arquivosUrls.push(publicURL.publicUrl || ""); // Armazena a URL do arquivo
+              arquivoUrl = publicURL.publicUrl;
             }
-            console.log(publicURL.publicUrl)
           }
         }
       }
   
-      // Verifique se pelo menos uma URL válida foi gerada
-      imagemUrls = imagemUrls.filter(url => url); // Remove URLs inválidas
-      arquivosUrls = arquivosUrls.filter(url => url); // Remove URLs inválidas
-  
-      // Inserir o aviso no Supabase com as URLs das imagens, arquivos e o ID do professor logado
+      // Inserir o aviso no Supabase com as URLs das imagens e arquivos
       const { error } = await supabase.from("Avisos").insert({
         descricao: conteudo,
-        imagem: imagemUrls.length > 0 ? imagemUrls : null, // Armazena as URLs das imagens ou null
-        arquivos: arquivosUrls.length > 0 ? arquivosUrls : null, // Armazena as URLs dos arquivos ou null
-        professor_id: professor_id, // Adiciona o ID do professor logado
+        imagem: imagemUrl || null, // Apenas uma URL de imagem ou null
+        arquivos: arquivoUrl || null, // Apenas uma URL de arquivo ou null
+        professor_id: professor_id,
       });
-
-      console.log('imagemUrls:', imagemUrls);
-
+  
       if (error) throw error;
   
       setMensagem({ tipo: "sucesso", texto: "Aviso publicado com sucesso!" });
@@ -123,12 +114,13 @@ export default function PaginaAviso() {
       setConteudo("");
       setArquivos([]);
     } catch (error) {
-      console.error("Erro ao enviar o aviso:", error || error);
+      console.error("Erro ao enviar o aviso:", error);
       setMensagem({ tipo: "erro", texto: "Erro ao publicar o aviso. Tente novamente." });
-    }finally{
-      setIsLoading(false)
+    } finally {
+      setIsLoading(false);
     }
   };
+  
   
   
   
@@ -161,7 +153,7 @@ export default function PaginaAviso() {
         // Verifica se encontrou algum ID e seta o estado professor_id
         if (data && data.id) {
           setProfessor_id(data.id); // Armazena o ID do professor no estado
-          console.log(`${data.id}`);
+          
         }
   
       } catch (err) {
