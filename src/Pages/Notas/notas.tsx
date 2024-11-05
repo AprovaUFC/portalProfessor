@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { Search, Check, Eye } from "lucide-react"
+import { Search, Check, Eye, ChevronUp, ChevronDown } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { supabase } from "@/lib/supabase"
@@ -39,6 +39,8 @@ export default function PaginaNotas() {
   const [nota, setNota] = useState("")
   const itensPorPagina = 5
   const [isLoading, setIsLoading] = useState(true)
+  const [expandedRow, setExpandedRow] = useState<number | null>(null)
+
 
   const visualizarPDF = (url: string) => {
     setPdfSelecionado(url)
@@ -145,7 +147,9 @@ export default function PaginaNotas() {
     }
   }
 
-
+  const toggleExpandedRow = (id: number) => {
+    setExpandedRow(expandedRow === id ? null : id)
+  }
 
   return (
     <div className="flex bg-green-50">
@@ -181,20 +185,21 @@ export default function PaginaNotas() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Título</TableHead>
-                      <TableHead>Data de Entrega</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Arquivo</TableHead>
-                      <TableHead>Ação</TableHead>
+                      <TableHead className="hidden md:table-cell">Título</TableHead>
+                      <TableHead className="hidden md:table-cell">Data de Entrega</TableHead>
+                      <TableHead className="hidden md:table-cell">Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Arquivo</TableHead>
+                      <TableHead className="hidden md:table-cell">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {atividadesPaginadas.map((atividade) => (
+                      <>
                       <TableRow key={atividade.id}>
-                        <TableCell>{atividade.titulo}</TableCell>
-                        <TableCell>{formatarData(atividade.dataEntrega)}</TableCell>
-                        <TableCell>{atividade.status}</TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">{atividade.titulo}</TableCell>
+                        <TableCell className="hidden md:table-cell">{formatarData(atividade.dataEntrega)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{atividade.status}</TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <Dialog>
                                 <DialogTrigger asChild>
                                   <Button
@@ -221,7 +226,7 @@ export default function PaginaNotas() {
                                 </DialogContent>
                               </Dialog>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
@@ -265,6 +270,111 @@ export default function PaginaNotas() {
                           </Dialog>
                         </TableCell>
                       </TableRow>
+                          <TableCell className="md:hidden">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleExpandedRow(atividade.id)}
+                            className="w-full justify-between"
+                          >
+                            <span className="font-medium text-left flex-grow">{atividade.titulo}</span>
+                            {expandedRow === atividade.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          </Button>
+                        </TableCell>
+                         {/* Exibir detalhes em tela menor */}
+                         {expandedRow === atividade.id && (
+                          <motion.tr
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="md:hidden"
+                          >
+                            <TableCell colSpan={6}>
+                              <div className="py-2 space-y-2">
+                                <p><strong>Atividade</strong> {atividade.titulo}</p>
+                                <p><strong>Data de entrega:</strong> {new Date(atividade.dataEntrega).toLocaleDateString('pt-BR')}</p>
+                                <div>
+                                  <strong>Documento:</strong>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="bg-blue-100 text-blue-700 hover:bg-blue-200 ml-2"
+                                        onClick={() => visualizarPDF(atividade.arquivo)}
+                                      >
+                                        <Eye size={16} className="mr-1" /> Visualizar PDF
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-full max-h-[80vh] w-[90vw]">
+                                      <DialogHeader>
+                                        <DialogTitle>Documento de {atividade.titulo}</DialogTitle>
+                                        <DialogDescription>Analisando o documento PDF enviado pelo aluno</DialogDescription>
+                                      </DialogHeader>
+                                      <div className="mt-4 h-full">
+                                        <iframe
+                                          src={pdfSelecionado || undefined}
+                                          className="w-full h-[60vh]"
+                                          title={`Documento de ${atividade.titulo}`}
+                                        />
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                </div>
+                                <div >
+                                <TableCell className="m-0 p-0 pt-4">
+                                <strong>Nota: </strong>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                                        
+                                      >
+                                        Atribuir Nota
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Atribuir Nota</DialogTitle>
+                                        <DialogDescription>
+                                          Insira a nota para a atividade "{atividade.titulo}"
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <div className="">
+                                        <Label htmlFor="nota">Nota</Label>
+                                        <Input
+                                          id="nota"
+                                          type="number"
+                                          min="0"
+                                          max="10"
+                                          step="0.1"
+                                          value={nota}
+                                          onChange={(e) => setNota(e.target.value)}
+                                          placeholder="Insira a nota (0-10)"
+                                        />
+                                      </div>
+                                      <DialogFooter>
+                                        <Button
+                                          onClick={() => atribuirNota(atividade.id, nota)}
+                                          disabled={!nota || parseFloat(nota) < 0 || parseFloat(nota) > 10}
+                                        >
+                                          <Check className="mr-2 h-4 w-4" /> Confirmar Nota
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </TableCell>
+                                  
+                                </div>
+                              </div>
+                            </TableCell>
+                          </motion.tr>
+                        )}
+                      </>
                     ))}
                   </TableBody>
                 </Table>
