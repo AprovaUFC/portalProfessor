@@ -4,13 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import Loading from '../Loading/Loading'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
 
-type AreaEscolhida = "Matemática" | "Redação" | "História" | "Física"
 
 
 const AuthComponent = () => {
@@ -20,7 +18,6 @@ const AuthComponent = () => {
     const [email, setEmail] = useState("")
     const [name, setName] = useState("")
     const [matricula, setMatricula] = useState("")
-    const [areaEscolhida, setAreaEscolhida] = useState<AreaEscolhida | "">("")
     const [loginError,setLoginError] = useState('')
     const [registerError,setRegisterError] = useState('')
     const [showModal,setShowModal] = useState(false)
@@ -250,20 +247,6 @@ const AuthComponent = () => {
                   required
                   className="border-green-300 focus:border-green-500 focus:ring-green-500"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="areaEscolhida">Área Escolhida</Label>
-                <Select onValueChange={(value: string) => setAreaEscolhida(value as AreaEscolhida)} value={areaEscolhida}>
-                  <SelectTrigger className="border-green-300 focus:border-green-500 focus:ring-green-500">
-                    <SelectValue placeholder="Selecione a área" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Matemática">Matemática</SelectItem>
-                    <SelectItem value="Redação">Redação</SelectItem>
-                    <SelectItem value="História">História</SelectItem>
-                    <SelectItem value="Física">Física</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Cadastrar</Button>
             </form>
