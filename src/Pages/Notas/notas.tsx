@@ -17,12 +17,20 @@ import NavBarComponent from "@/components/NavBarComponent/NavBarComponent"
 import Loading from "@/components/Loading/Loading"
 
 type Atividade = {
+  dataEntrega?: string | ""
   id: number
   titulo: string
-  alunoId: number
-  dataEntrega: string
   status: string
   arquivo: string
+  nota?: number | null
+}
+
+
+type Nota = {
+  atividade_id: number
+  aluno_id: number
+  dataEntrega: string
+  nota?: number | undefined | null
 }
 
 const fadeInUp = {
@@ -32,7 +40,7 @@ const fadeInUp = {
 }
 
 export default function PaginaNotas() {
-  const [atividades, setAtividades] = useState<Atividade[]>([])
+  const [atividades, setAtividades] = useState<Atividade>()
   const [busca, setBusca] = useState("")
   const [paginaAtual, setPaginaAtual] = useState(1)
   const [pdfSelecionado, setPdfSelecionado] = useState<string | null>(null)
@@ -53,9 +61,9 @@ export default function PaginaNotas() {
         // Busca todas as notas que são null (sem avaliação)
         const { data: notasData, error: notasError } = await supabase
           .from('Nota')
-          .select('atividade_id, aluno_id, dataEntrega')
+          .select('atividade_id, aluno_id, dataEntrega,nota')
           .is('nota', null)
-
+        console.log(notasData)
         if (notasError) {
           console.error('Erro ao buscar notas:', notasError)
           return
@@ -73,21 +81,26 @@ export default function PaginaNotas() {
           console.error('Erro ao buscar atividades:', atividadesError)
           return
         }
-
+        
+      
         // Mapeia os dados da atividade para o formato necessário para a tabela
-        const atividadesMapeadas: Atividade[] = atividadesData.map((atividade: any) => {
-          const notaCorrespondente: any = notasData.find((nota) => nota.atividade_id === atividade.id)
+        const atividadesMapeadas: Atividade[] = atividadesData.map((atividade: Atividade) => {
+          const notaCorrespondente:Nota[] = notasData.filter((nota) => nota.atividade_id === atividade.id)
+          console.log(notaCorrespondente)
           return {
             id: atividade.id,
             titulo: atividade.titulo,
-            alunoId: notaCorrespondente.aluno_id,
-            dataEntrega: notaCorrespondente.dataEntrega,
+            aluno_id: notaCorrespondente.length > 0 ? notaCorrespondente[0].aluno_id : 0,
+            dataEntrega: notaCorrespondente.length > 0 ? notaCorrespondente[0].dataEntrega : "",
             status: atividade.status,
-            arquivo: atividade.arquivo
+            arquivo: atividade.arquivo,
+            nota: notaCorrespondente.length > 0 ? notaCorrespondente[0].nota : null
           }
         })
-
-        setAtividades(atividadesMapeadas)
+        
+        console.log(atividadesMapeadas[0])
+        setAtividades(atividadesMapeadas[0])
+        
       } catch (error) {
         console.error('Erro ao buscar atividades sem nota:', error)
       }finally{
@@ -98,9 +111,8 @@ export default function PaginaNotas() {
     fetchAtividadesSemNota()
   }, [])
 
-  const atividadesFiltradas = atividades.filter(atividade =>
-    atividade.titulo.toLowerCase().includes(busca.toLowerCase())
-  )
+  const atividadesFiltradas = atividades && atividades.titulo.toLowerCase().includes(busca.toLowerCase()) ? [atividades] : []
+  console.log(atividadesFiltradas)
 
   const totalPaginas = Math.ceil(atividadesFiltradas.length / itensPorPagina)
   const indiceInicial = (paginaAtual - 1) * itensPorPagina
@@ -135,9 +147,7 @@ export default function PaginaNotas() {
       }
 
       // Atualiza o status da atividade na interface
-      setAtividades(atividades.map(atividade =>
-        atividade.id === id ? { ...atividade, status: "Avaliada" } : atividade
-      ))
+      
 
       toast.success(`Nota ${novaNota} atribuída com sucesso!`)
       setNota("")
@@ -193,11 +203,11 @@ export default function PaginaNotas() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {atividadesPaginadas.map((atividade) => (
+                    {atividadesPaginadas.map((atividade:Atividade) => (
                       <>
                       <TableRow key={atividade.id}>
                         <TableCell className="hidden md:table-cell">{atividade.titulo}</TableCell>
-                        <TableCell className="hidden md:table-cell">{formatarData(atividade.dataEntrega)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{atividade.dataEntrega ? formatarData(atividade.dataEntrega) : 'Data não encontrada'}</TableCell>
                         <TableCell className="hidden md:table-cell">{atividade.status}</TableCell>
                         <TableCell className="hidden md:table-cell">
                           <Dialog>
@@ -293,7 +303,7 @@ export default function PaginaNotas() {
                             <TableCell colSpan={6}>
                               <div className="py-2 space-y-2">
                                 <p><strong>Atividade</strong> {atividade.titulo}</p>
-                                <p><strong>Data de entrega:</strong> {new Date(atividade.dataEntrega).toLocaleDateString('pt-BR')}</p>
+                                <p><strong>Data de entrega:</strong> {atividade.dataEntrega? new Date(atividade.dataEntrega).toLocaleDateString('pt-BR') : "Data não encontrada"}</p>
                                 <div>
                                   <strong>Documento:</strong>
                                   <Dialog>
