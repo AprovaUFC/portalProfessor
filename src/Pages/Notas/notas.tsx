@@ -63,7 +63,7 @@ export default function PaginaNotas() {
           .from('Nota')
           .select('atividade_id, aluno_id, dataEntrega,nota')
           .is('nota', null)
-        console.log(notasData)
+        
         if (notasError) {
           console.error('Erro ao buscar notas:', notasError)
           return
@@ -86,7 +86,7 @@ export default function PaginaNotas() {
         // Mapeia os dados da atividade para o formato necessário para a tabela
         const atividadesMapeadas: Atividade[] = atividadesData.map((atividade: Atividade) => {
           const notaCorrespondente:Nota[] = notasData.filter((nota) => nota.atividade_id === atividade.id)
-          console.log(notaCorrespondente)
+          
           return {
             id: atividade.id,
             titulo: atividade.titulo,
@@ -98,7 +98,7 @@ export default function PaginaNotas() {
           }
         })
         
-        console.log(atividadesMapeadas[0])
+        
         setAtividades(atividadesMapeadas[0])
         
       } catch (error) {
@@ -112,7 +112,7 @@ export default function PaginaNotas() {
   }, [])
 
   const atividadesFiltradas = atividades && atividades.titulo.toLowerCase().includes(busca.toLowerCase()) ? [atividades] : []
-  console.log(atividadesFiltradas)
+  
 
   const totalPaginas = Math.ceil(atividadesFiltradas.length / itensPorPagina)
   const indiceInicial = (paginaAtual - 1) * itensPorPagina
