@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import Loading from '../Loading/Loading'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
-import { CheckboxWithText } from '../Checkbox/checkboxText'
+import LoginSection from '../LoginSection/LoginSection'
+import SignUpSection from '../SignUpSection/SignUpSection'
+import ModalSignUp from '../ModalSignUp/ModalSignUp'
+import ModalForgotPassword from '../ModalForgotPassword/ModalForgotPassword'
 
 
 
@@ -19,7 +19,6 @@ const AuthComponent = () => {
     const [isChecked,setIsChecked] = useState(false)
     const [email, setEmail] = useState("")
     const [name, setName] = useState("")
-    const [matricula, setMatricula] = useState("")
     const [loginError,setLoginError] = useState('')
     const [registerError,setRegisterError] = useState('')
     const [showModal,setShowModal] = useState(false)
@@ -114,13 +113,13 @@ const AuthComponent = () => {
           .insert([{
               nome: name,
               email: email,
-              matricula: matricula,
+              
               termAccepted: isChecked
               
           }])
           .select('id')
           .single(); // Retorna o ID do novo registro
-  
+          
       if (insertError || !professorData) {
           setIsLoading(false);
           console.error('Erro ao inserir dados na tabela Professor:', insertError?.message);
@@ -142,7 +141,7 @@ const AuthComponent = () => {
       });
   
       setIsLoading(false);
-  
+
       if (error) {
           console.error('Erro ao cadastrar no Supabase Auth:', error.message);
       } else {
@@ -151,11 +150,6 @@ const AuthComponent = () => {
       }
   };
   
-
-    if(isLoading){
-        return <Loading/>
-    }
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-green-50 max-sm:p-6">
     <Card className="w-[400px]">
@@ -171,145 +165,52 @@ const AuthComponent = () => {
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-              {/* Exibe a mensagem de erro se houver */}
-              {loginError && (
-                  <p className="text-red-500 text-sm">
-                    {loginError}
-                  </p>
-                )}
-                {registerError && (
-                    <p className='text-red-500 text-sm'>
-                        {registerError}
-                    </p>
-                )}
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Entrar</Button>
+              <LoginSection
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                loginError={loginError}
+              />         
               <Button type="button" variant="link" onClick={() => setForgotPasswordModal(true)} className="mt-2 w-full self-center">
                 Esqueceu sua senha?
               </Button>
-
 
             </form>
           </TabsContent>
           <TabsContent value="register">
             <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Senha</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="matricula">Matrícula</Label>
-                <Input
-                  id="matricula"
-                  type="text"
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  required
-                  className="border-green-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-              <CheckboxWithText
-                handleCheckboxChange={handleCheckboxChange}
+              <SignUpSection
+                email={email}
+                setEmail={setEmail}
+                name={name}
+                setName={setName}
+                password={password}
+                setPassword={setPassword}
                 isChecked={isChecked}
+                handleCheckboxChange={handleCheckboxChange}
+                registerError={registerError}
               />
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Cadastrar</Button>
             </form>
           </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
     
-    <Dialog open={showModal} onOpenChange={setShowModal}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Cadastro Realizado!</DialogTitle>
-            <DialogDescription>
-              Verifique a caixa de mensagens do email inserido no cadastro para confirmar o email.
-            </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-
-    <Dialog open={forgotPasswordModal} onOpenChange={setForgotPasswordModal}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Recuperar Senha</DialogTitle>
-          <DialogDescription>
-            Insira seu email para receber instruções de redefinição de senha.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleForgotPassword} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="reset-email">Email</Label>
-            <Input
-              id="reset-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="border-green-300 focus:border-green-500 focus:ring-green-500"
-            />
-          </div>
-          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Enviar Email de Recuperação</Button>
-        </form>
-        {resetMessage && (
-          <p className="mt-4 text-green-500 text-sm">{resetMessage}</p>
-        )}
-      </DialogContent>
-    </Dialog>
-
-    
+    <ModalSignUp
+      showModal={showModal}
+      setShowModal={setShowModal}
+    />
+    <ModalForgotPassword
+      forgotPasswordModal={forgotPasswordModal}
+      setForgotPasswordModal={setForgotPasswordModal}
+      handleForgotPassword={handleForgotPassword}
+      email={email}
+      setEmail={setEmail}
+      resetMessage={resetMessage}
+    />
+ 
+    {isLoading && (<Loading/>)}
   </div>
   )
 }
