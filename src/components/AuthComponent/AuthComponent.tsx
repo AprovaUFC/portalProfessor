@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import Loading from '../Loading/Loading'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
+import { CheckboxWithText } from '../Checkbox/checkboxText'
 
 
 
@@ -15,6 +16,7 @@ const AuthComponent = () => {
 
     const [isLoading,setIsLoading] = useState(false)
     const [password, setPassword] = useState("")
+    const [isChecked,setIsChecked] = useState(false)
     const [email, setEmail] = useState("")
     const [name, setName] = useState("")
     const [matricula, setMatricula] = useState("")
@@ -25,6 +27,9 @@ const AuthComponent = () => {
     const [resetMessage, setResetMessage] = useState('');
     const navigate = useNavigate();
 
+    const handleCheckboxChange = (checked: boolean) => {
+      setIsChecked(checked);
+    };
 
     const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -59,7 +64,7 @@ const AuthComponent = () => {
         // Busca o perfil do usuário após login
           const { data: userProfile, error: profileError }:any = await supabase
               .from('Professor') // Substitua pelo nome correto da tabela de perfis
-              .select('is_Professor')
+              .select('is_Professor, termAccepted')
               .eq('email', user.email)
               .single();
           // Verifica se houve erro ao buscar o perfil ou se o usuário não é um professor
@@ -67,6 +72,10 @@ const AuthComponent = () => {
               await supabase.auth.signOut();
               setLoginError('Acesso negado. Somente professores podem fazer login.');
               return;
+          }else if(userProfile?.termAccepted === false){
+            await supabase.auth.signOut();
+            setLoginError('Acesso negado. o usuário não aceitou os termos de uso');
+            return;
           }
           
           // Login bem-sucedido e é professor
@@ -106,6 +115,7 @@ const AuthComponent = () => {
               nome: name,
               email: email,
               matricula: matricula,
+              termAccepted: isChecked
               
           }])
           .select('id')
@@ -183,22 +193,23 @@ const AuthComponent = () => {
                   className="border-green-300 focus:border-green-500 focus:ring-green-500"
                 />
               </div>
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Entrar</Button>
-              <Button type="button" variant="link" onClick={() => setForgotPasswordModal(true)} className="mt-2 w-full self-center">
-                Esqueceu sua senha?
-              </Button>
-
-                {/* Exibe a mensagem de erro se houver */}
-                {loginError && (
-                    <p className="text-red-500 text-sm">
-                        {loginError}
-                    </p>
+              {/* Exibe a mensagem de erro se houver */}
+              {loginError && (
+                  <p className="text-red-500 text-sm">
+                    {loginError}
+                  </p>
                 )}
                 {registerError && (
                     <p className='text-red-500 text-sm'>
                         {registerError}
                     </p>
                 )}
+              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Entrar</Button>
+              <Button type="button" variant="link" onClick={() => setForgotPasswordModal(true)} className="mt-2 w-full self-center">
+                Esqueceu sua senha?
+              </Button>
+
+
             </form>
           </TabsContent>
           <TabsContent value="register">
@@ -248,6 +259,10 @@ const AuthComponent = () => {
                   className="border-green-300 focus:border-green-500 focus:ring-green-500"
                 />
               </div>
+              <CheckboxWithText
+                handleCheckboxChange={handleCheckboxChange}
+                isChecked={isChecked}
+              />
               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">Cadastrar</Button>
             </form>
           </TabsContent>
