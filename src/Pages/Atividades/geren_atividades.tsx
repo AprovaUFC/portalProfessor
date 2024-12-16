@@ -73,7 +73,7 @@ export default function PaginaGerenciarAtividades() {
     return regex.test(date)
   }
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsLoading(true)
     e.preventDefault();
     const [diaDisponivel, mesDisponivel, anoDisponivel] = atividade.dataDisponivel.split('/')
