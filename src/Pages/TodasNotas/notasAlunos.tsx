@@ -19,11 +19,6 @@ type Nota = {
   valor: number
 }
 
-type NotaResponse = {
-    aluno_id: { id: number; name: string };
-    nota: number;
-    atividade_id: { titulo: string };
-  };
 
 type Aluno = {
   aluno_id: number
@@ -80,42 +75,98 @@ export default function NotasAlunos() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from('Nota')
-        .select(`
-          aluno_id ( id, name ),
-          nota,
-          atividade_id ( titulo )
-        `) as { data: NotaResponse[] | null; error: any };
-    
-      if (error) {
-        console.error("Erro ao buscar dados: ", error);
+      setIsLoading(true); // Ativa o estado de carregamento
+  
+      // 1ª Requisição: Buscar os dados de notas com aluno_id e atividade_id
+      const { data: notasData, error: notasError } = await supabase
+        .from("Nota")
+        .select("aluno_id, nota, atividade_id");
+  
+      if (notasError) {
+        console.error("Erro ao buscar as notas: ", notasError);
+        setIsLoading(false);
         return;
       }
-    
-      if (data) {
-        const dadosAgrupados = data.reduce((acc: Aluno[], item) => {
-          const alunoExistente = acc.find(aluno => aluno.aluno_id === item.aluno_id.id);
+  
+      if (!notasData || notasData.length === 0) {
+        console.warn("Nenhum dado encontrado.");
+        setIsLoading(false);
+        return;
+      }
+  
+  
+      // 2ª Requisição: Buscar dados dos alunos usando aluno_id
+      const alunoIds = [...new Set(notasData.map((item) => item.aluno_id))];
+  
+      const { data: alunosData, error: alunosError } = await supabase
+        .from("Aluno")
+        .select("id, name")
+        .in("id", alunoIds);
+  
+      if (alunosError) {
+        console.error("Erro ao buscar dados dos alunos: ", alunosError);
+        setIsLoading(false);
+        return;
+      }
+  
+  
+      // 3ª Requisição: Buscar dados das atividades usando atividade_id
+      const atividadeIds = [
+        ...new Set(notasData.map((item) => item.atividade_id)),
+      ];
+  
+      const { data: atividadesData, error: atividadesError } = await supabase
+        .from("Atividade")
+        .select("id, titulo")
+        .in("id", atividadeIds);
+  
+      if (atividadesError) {
+        console.error("Erro ao buscar dados das atividades: ", atividadesError);
+        setIsLoading(false);
+        return;
+      }
+  
+  
+      // Agrupando dados (combinação de notas, alunos e atividades)
+      const dadosAgrupados = notasData.reduce((acc: Aluno[], notaItem) => {
+        const aluno = alunosData.find((a) => a.id === notaItem.aluno_id);
+        const atividade = atividadesData.find((a) => a.id === notaItem.atividade_id);
+  
+        if (aluno && atividade) {
+          const alunoExistente = acc.find((item) => item.aluno_id === aluno.id);
   
           if (alunoExistente) {
-            alunoExistente.notas.push({ disciplina: item.atividade_id?.titulo || '', valor: item.nota });
+            alunoExistente.notas.push({
+              disciplina: atividade.titulo || "Desconhecida",
+              valor: notaItem.nota,
+            });
           } else {
             acc.push({
-              aluno_id: item.aluno_id.id,
-              nome: item.aluno_id.name || 'Desconhecido',
-              notas: [{ disciplina: item.atividade_id?.titulo || '', valor: item.nota }]
+              aluno_id: aluno.id,
+              nome: aluno.name || "Desconhecido",
+              notas: [
+                {
+                  disciplina: atividade.titulo || "Desconhecida",
+                  valor: notaItem.nota,
+                },
+              ],
             });
           }
-          return acc;
-        }, []);
-        setAlunos(dadosAgrupados);
-      }
-      setIsLoading(false)
+        }
+  
+        return acc;
+      }, []);
+  
+      // Atualiza o estado
+      setAlunos(dadosAgrupados);
+      setIsLoading(false);
     };
   
     fetchData();
-    
   }, []);
+  
+  
+  
   
   
 

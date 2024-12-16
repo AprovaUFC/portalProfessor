@@ -61,7 +61,7 @@ const AuthComponent = () => {
         }
 
         // Busca o perfil do usuário após login
-          const { data: userProfile, error: profileError }:any = await supabase
+          const { data: userProfile, error: profileError } = await supabase
               .from('Professor') // Substitua pelo nome correto da tabela de perfis
               .select('is_Professor, termAccepted')
               .eq('email', user.email)

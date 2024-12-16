@@ -149,7 +149,7 @@ export default function PerfilProfessor() {
     }
     
     fetchData();
-  }, [showConfirmEmailModal]);
+  }, [showConfirmEmailModal, novaInfo.email]);
   
 
   const handleEdit = () => {

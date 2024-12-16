@@ -22,7 +22,7 @@ export function CheckboxWithText(props: CheckboxProps) {
           Li e aceito os termos e condições
         </label>
         <p className="text-sm text-muted-foreground">
-          <a href="https://zdfhrqkkdxrrwxgmkjia.supabase.co/storage/v1/object/public/termo/Termo_de_uso.pdf" target="_blank">
+          <a href="https://zdfhrqkkdxrrwxgmkjia.supabase.co/storage/v1/object/public/termo/Termo_de_uso.pdf" target="_blank" rel="noreferrer">
          Clique aqui para ler o termo
          </a>
         </p>
