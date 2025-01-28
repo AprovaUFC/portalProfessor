@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import NavBarComponent from "@/components/NavBarComponent/NavBarComponent"
 import { Pencil, Trash2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Aula = {
   id: string
@@ -21,6 +22,8 @@ type Aula = {
   horario: string
   disciplina: string
   sala: string
+  unidade: string,
+  Professor: string
 }
 
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
@@ -38,6 +41,7 @@ export default function PaginaAjusteHorarios() {
   const [aulaEmRemocao,setAulaEmRemocao] = useState<Aula | null>(null)
   const [dialogoAberto, setDialogoAberto] = useState(false)
   const [removeDialog,setRemoveDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const adicionarOuEditarAula = async (aula: Aula) => {
     if (aulaEmEdicao) {
@@ -48,6 +52,8 @@ export default function PaginaAjusteHorarios() {
           horario: aula.horario,
           sala: aula.sala,
           disciplina: aula.disciplina,
+          Professor: aula.Professor,
+          unidade: aula.unidade
         })
         .eq('id', aulaEmEdicao.id)
         .select('*'); // Retorna os dados atualizados
@@ -101,18 +107,18 @@ export default function PaginaAjusteHorarios() {
   useEffect(()=>{
 
       const fetchHorarios = async () => {
-        const {data:aulas,error:aulasError} = await supabase.from('Horario').select('dia,horario,sala,disciplina,id')
+        const {data:aulas,error:aulasError} = await supabase.from('Horario').select('dia,horario,sala,disciplina,id,Professor,unidade')
 
         if(aulasError){
             console.error('Erro ao buscar horarios',aulasError)
             return
         }
         setAulas(aulas)
-        console.log(aulas)
+        setIsLoading(false)    
       }
 
     fetchHorarios()
-
+    
   },[])
 
  
@@ -155,6 +161,8 @@ export default function PaginaAjusteHorarios() {
                         horario: aula.horario,
                         sala: aula.sala,
                         disciplina: aula.disciplina,
+                        unidade: aula.unidade,
+                        Professor: aula.Professor
                     }
                 ]);
 
@@ -183,8 +191,7 @@ export default function PaginaAjusteHorarios() {
 };
 
 
-  console.log(aulaEmEdicao)
-  //console.log(aulas)
+
   const renderGradeHorarios = () => (
     <div className="overflow-x-auto">
       <div className="min-w-[600px]">
@@ -204,7 +211,8 @@ export default function PaginaAjusteHorarios() {
                   {aulaAtual ? (
                     <div className="bg-green-100 p-2 rounded text-sm">
                       <p className="font-bold">{aulaAtual.disciplina}</p>
-                      <p>Sala {aulaAtual.sala}</p>
+                      <p>Professor {aulaAtual.Professor}</p>
+                      <p>Sala {aulaAtual.sala} Unidade {aulaAtual.unidade}</p>
                       <div className="flex">
                         <Button
                           variant="ghost"
@@ -253,6 +261,34 @@ export default function PaginaAjusteHorarios() {
     </div>
   )
 
+  const renderSkeletonAcordeao = () => (
+    <div className="space-y-2">
+      {diasSemana.map((_, index) => (
+        <Skeleton key={index} className="h-12 w-full" />
+      ))}
+    </div>
+  )
+  const renderSkeletonGrade = () => (
+    <div className="overflow-x-auto">
+      <div className="min-w-[600px]">
+        <div className="grid grid-cols-6 gap-4 mb-4">
+          <Skeleton className="h-8 w-full" />
+          {diasSemana.map((_, index) => (
+            <Skeleton key={index} className="h-8 w-full" />
+          ))}
+        </div>
+        {horarios.map((_, horarioIndex) => (
+          <div key={horarioIndex} className="grid grid-cols-6 gap-4 mb-2">
+            <Skeleton className="h-20 w-full" />
+            {diasSemana.map((_, diaIndex) => (
+              <Skeleton key={`${horarioIndex}-${diaIndex}`} className="h-20 w-full" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   const renderAcordeaoHorarios = () => (
     <Accordion type="single" collapsible className="w-full">
       {diasSemana.map(dia => (
@@ -267,7 +303,8 @@ export default function PaginaAjusteHorarios() {
                   {aulaAtual ? (
                     <div className="bg-green-100 p-2 rounded text-sm mt-1">
                       <p className="font-bold">{aulaAtual.disciplina}</p>
-                      <p>Sala {aulaAtual.sala}</p>
+                      <p>Professor {aulaAtual.Professor}</p>
+                      <p>Sala {aulaAtual.sala} Unidade {aulaAtual.unidade}</p>
                       <div className="mt-2">
                         <Button
                           variant="outline"
@@ -309,12 +346,15 @@ export default function PaginaAjusteHorarios() {
       ))}
     </Accordion>
   )
+  
+
+  
 
   return (
     <div className="min-h-screen flex bg-green-50">
         <NavBarComponent/>
-      <motion.div
-        className="max-w-6xl mx-auto w-screen pt-7 max-sm:m-6"
+        <motion.div
+        className="max-w-6xl mx-auto pt-7 w-screen max-sm:m-6"
         initial="initial"
         animate="animate"
         variants={fadeInUp}
@@ -327,12 +367,25 @@ export default function PaginaAjusteHorarios() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="hidden md:block">
-              {renderGradeHorarios()}
-            </div>
-            <div className="md:hidden">
-              {renderAcordeaoHorarios()}
-            </div>
+            {isLoading ? (
+              <>
+                <div className="hidden md:block">
+                  {renderSkeletonGrade()}
+                </div>
+                <div className="md:hidden">
+                  {renderSkeletonAcordeao()}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="hidden md:block">
+                  {renderGradeHorarios()}
+                </div>
+                <div className="md:hidden">
+                  {renderAcordeaoHorarios()}
+                </div>
+              </>
+            )}
             <Dialog open={dialogoAberto} onOpenChange={setDialogoAberto}>
               <DialogContent>
                 <DialogHeader>
@@ -349,8 +402,9 @@ export default function PaginaAjusteHorarios() {
                     dia: formData.get("dia") as string,
                     horario: formData.get("horario") as string,
                     disciplina: formData.get("disciplina") as string,
-                    
+                    unidade: formData.get("unidade") as string,
                     sala: formData.get("sala") as string,
+                    Professor: formData.get("Professor") as string,
                   }
                   if (verificarConflito(novaAula)) {
                     toast.error("Conflito de horário detectado!")
@@ -406,9 +460,27 @@ export default function PaginaAjusteHorarios() {
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="sala">Unidade</Label>
+                      <Input
+                        id="unidade"
+                        name="unidade"
+                        defaultValue={aulaEmEdicao?.unidade || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sala">Professor</Label>
+                      <Input
+                        id="Professor"
+                        name="Professor"
+                        defaultValue={aulaEmEdicao?.Professor || ""}
+                        required
+                      />
+                    </div>
                   </div>
                   <DialogFooter>
-                    <Button type="submit">Salvar</Button>
+                    <Button type="submit">Salvar Alteração</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -433,13 +505,14 @@ export default function PaginaAjusteHorarios() {
               </DialogContent>
             </Dialog>
             <Button className="mt-4 w-full" onClick={salvarHorarios}>
-              Salvar Todos os Horários
+              Salvar Novos Horarios Inseridos
             </Button>
           </CardContent>
         </Card>
       </motion.div>
       <ToastContainer position="bottom-right" autoClose={3000} />
+    
     </div>
-  
   )
 }
+
