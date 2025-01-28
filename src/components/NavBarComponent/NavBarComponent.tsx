@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../ui/button'
-import { Bell, BookOpen, ChartNoAxesCombined, Check, GraduationCap,  LogOut, Menu, User, UserCheck } from 'lucide-react'
+import { Bell, BookOpen, ChartNoAxesCombined, Check, Clock, GraduationCap,  LogOut, Menu, User, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -107,6 +107,17 @@ const NavBarComponent = () => {
             >
               <ChartNoAxesCombined className="mr-2 h-4 w-4" />
               Notas
+            </Button>
+        </Link>
+      </li>
+      <li>
+        <Link to={'/horarios'}>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-green-700 hover:bg-green-100 hover:text-green-800"
+            >
+              <Clock className="mr-2 h-4 w-4"/>
+              Horários
             </Button>
         </Link>
       </li>

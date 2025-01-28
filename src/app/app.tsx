@@ -2,6 +2,7 @@ import PaginaGerenciarAtividades from '@/Pages/Atividades/geren_atividades';
 import PaginaAviso from '@/Pages/Avisos/Avisos';
 import AvisosCadastrados from '@/Pages/AvisosCadastrados/avisosCadastrados';
 import PaginaGerenciarCadastros from '@/Pages/Geren_Cadastro/gerenc_cadastros';
+import PaginaAjusteHorarios from '@/Pages/Horarios/ajusteHorarios';
 import PaginaNotas from '@/Pages/Notas/notas';
 import PerfilProfessor from '@/Pages/Perfil/perfil';
 import ResetSenha from '@/Pages/ResetSenha/ResetSenha';
@@ -54,6 +55,11 @@ const App: React.FC = () => {
         <Route path='/notasAlunos' element={
           <PrivateRoute>
               <NotasAlunos/>
+          </PrivateRoute>
+        }></Route>
+        <Route path='/horarios' element={
+          <PrivateRoute>
+            <PaginaAjusteHorarios/>
           </PrivateRoute>
         }></Route>
         <Route path='/reset-password' element={<ResetSenha/>}></Route>
