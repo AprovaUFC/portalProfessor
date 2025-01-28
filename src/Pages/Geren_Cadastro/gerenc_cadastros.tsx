@@ -17,7 +17,7 @@ import { supabase } from "@/lib/supabase"
 import NavBarComponent from "@/components/NavBarComponent/NavBarComponent"
 import Loading from "@/components/Loading/Loading"
 
-type StatusCadastro = "PENDENTE" | "APROVADO" | "LISTA DE ESPERA"
+type StatusCadastro = "PENDENTE" | "APROVADO" | "LISTA DE ESPERA" | "REPROVADO"
 
 type Cadastro = {
   id: number
@@ -216,6 +216,7 @@ export default function PaginaGerenciarCadastros() {
                               <SelectContent>
                                 <SelectItem value="APROVADO">APROVADO</SelectItem>
                                 <SelectItem value="LISTA DE ESPERA">LISTA DE ESPERA</SelectItem>
+                                <SelectItem value="REPROVADO">REPROVADO</SelectItem>
                                 <SelectItem value="PENDENTE">PENDENTE</SelectItem>
                               </SelectContent>
                             </Select>
@@ -233,10 +234,10 @@ export default function PaginaGerenciarCadastros() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                                onClick={() => atualizarStatus(cadastro.id, "LISTA DE ESPERA")}
+                                className="bg-red-100 text-red-700 hover:bg-red-200"
+                                onClick={() => atualizarStatus(cadastro.id, "REPROVADO")}
                               >
-                                <X size={16} className="mr-1" /> Lista de Espera
+                                <X size={16} className="mr-1" /> Reprovar
                               </Button>
                             </div>
                           </TableCell>
